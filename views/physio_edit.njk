@@ -1,0 +1,55 @@
+{% extends "base.njk" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>Editar Fisioterapeuta</h2>
+    </div>
+    <div class="card-body">
+        <form action="/physios/{{ physio._id }}?_method=PUT" method="POST" enctype="multipart/form-data">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="name" class="form-label">Nombre</label>
+                    <input type="text" class="form-control" id="name" name="name" value="{{ physio.name }}" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="surname" class="form-label">Apellidos</label>
+                    <input type="text" class="form-control" id="surname" name="surname" value="{{ physio.surname }}" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="image" class="form-label">Imagen</label>
+                {% if physio.image %}
+                <img src="/uploads/{{ physio.image }}" alt="Foto actual" class="img-thumbnail mb-2" style="max-width: 200px">
+                {% endif %}
+                <input type="file" class="form-control" id="image" name="image" accept="image/*">
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="specialty" class="form-label">Especialidad</label>
+                    <input type="text" class="form-control" id="specialty" name="specialty" value="{{ physio.specialty }}" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="yearsOfExperience" class="form-label">Años de Experiencia</label>
+                    <input type="number" class="form-control" id="yearsOfExperience" name="yearsOfExperience" value="{{ physio.yearsOfExperience }}" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" value="{{ physio.email }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="phone" class="form-label">Teléfono</label>
+                <input type="tel" class="form-control" id="phone" name="phone" value="{{ physio.phone }}" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            <a href="/physios/{{ physio._id }}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %} 

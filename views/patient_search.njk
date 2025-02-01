@@ -1,0 +1,48 @@
+{% extends "base.njk" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>Búsqueda de Pacientes</h2>
+    </div>
+    <div class="card-body">
+        <form action="/patients/find" method="GET" class="mb-4">
+            <div class="input-group">
+                <input type="text" class="form-control" name="surname" placeholder="Buscar por apellido..." value="{{ searchTerm }}">
+                <button class="btn btn-primary" type="submit">Buscar</button>
+            </div>
+        </form>
+
+        {% if patients and patients.length > 0 %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Apellidos</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for patient in patients %}
+                    <tr>
+                        <td>{{ patient.name }}</td>
+                        <td>{{ patient.surname }}</td>
+                        <td>
+                            <a href="/patients/{{ patient._id }}" class="btn btn-info btn-sm">Ver detalles</a>
+                            <a href="/patients/{{ patient._id }}/edit" class="btn btn-warning btn-sm">Editar</a>
+                            <a href="/patients/{{ patient._id }}/record/new" class="btn btn-success btn-sm">Crear expediente</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% elif searchTerm %}
+        <div class="alert alert-info">
+            No se encontraron pacientes con el apellido "{{ searchTerm }}"
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

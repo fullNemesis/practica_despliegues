@@ -1,0 +1,28 @@
+{% extends "base.njk" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>Detalle del Fisioterapeuta</h2>
+    </div>
+    <div class="card-body">
+        <h5 class="card-title">{{ physio.name }} {{ physio.surname }}</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>DNI:</strong> {{ physio.dni }}</p>
+                <p><strong>Especialidad:</strong> {{ physio.specialty }}</p>
+                <p><strong>Teléfono:</strong> {{ physio.phone }}</p>
+                <p><strong>Email:</strong> {{ physio.email }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Número de Colegiado:</strong> {{ physio.collegiateNumber }}</p>
+                <p><strong>Años de Experiencia:</strong> {{ physio.yearsOfExperience }}</p>
+            </div>
+        </div>
+        <div class="mt-3">
+            <a href="/physios" class="btn btn-secondary">Volver</a>
+            <a href="/physios/{{ physio._id }}/edit" class="btn btn-warning">Editar</a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,10 +1,26 @@
 {
+  "name": "physiocareweb",
+  "version": "1.0.0",
+  "description": "Aplicación de gestión de clínica de fisioterapia",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "create-admin": "node scripts/createAdmin.js",
+    "update-admin": "node scripts/updateAdminPassword.js"
+  },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "bootstrap": "^5.3.3",
     "dotenv": "^16.4.5",
-    "error": "",
-    "express": "^4.21.1",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.7.1",
-    "result": ""
+    "express": "^4.18.3",
+    "express-session": "^1.17.3",
+    "method-override": "^3.0.0",
+    "mongoose": "^8.2.1",
+    "multer": "^1.4.5-lts.1",
+    "nunjucks": "^3.2.4"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
   }
 }

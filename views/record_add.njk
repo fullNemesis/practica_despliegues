@@ -1,0 +1,35 @@
+{% extends "base.njk" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>Nuevo Expediente Médico</h2>
+    </div>
+    <div class="card-body">
+        <form action="/records" method="POST">
+            <div class="mb-3">
+                <label for="patient" class="form-label">Paciente</label>
+                <select class="form-select" id="patient" name="patientId" required>
+                    <option value="">Seleccione un paciente</option>
+                    {% for patient in patients %}
+                    <option value="{{ patient._id }}">{{ patient.name }} {{ patient.surname }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="diagnosis" class="form-label">Diagnóstico Inicial</label>
+                <textarea class="form-control" id="diagnosis" name="diagnosis" rows="3" required></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="observations" class="form-label">Observaciones</label>
+                <textarea class="form-control" id="observations" name="observations" rows="3"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Crear Expediente</button>
+            <a href="/records" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,75 @@
+{% extends "base.njk" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>Registro de Nuevo Fisioterapeuta</h2>
+    </div>
+    <div class="card-body">
+        <form action="/physios" method="POST" enctype="multipart/form-data">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="name" class="form-label">Nombre</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="surname" class="form-label">Apellidos</label>
+                    <input type="text" class="form-control" id="surname" name="surname" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="image" class="form-label">Imagen</label>
+                <input type="file" class="form-control" id="image" name="image" accept="image/*">
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="dni" class="form-label">DNI</label>
+                    <input type="text" class="form-control" id="dni" name="dni" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="collegiateNumber" class="form-label">Número de Colegiado</label>
+                    <input type="text" class="form-control" id="collegiateNumber" name="collegiateNumber" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="specialty" class="form-label">Especialidad</label>
+                <input type="text" class="form-control" id="specialty" name="specialty" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="yearsOfExperience" class="form-label">Años de Experiencia</label>
+                <input type="number" class="form-control" id="yearsOfExperience" name="yearsOfExperience" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="phone" class="form-label">Teléfono</label>
+                <input type="tel" class="form-control" id="phone" name="phone" required>
+            </div>
+
+            <hr>
+            <h4>Datos de Usuario</h4>
+            
+            <div class="mb-3">
+                <label for="username" class="form-label">Nombre de Usuario</label>
+                <input type="text" class="form-control" id="username" name="username" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">Contraseña</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Registrar Fisioterapeuta</button>
+            <a href="/physios" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %} 

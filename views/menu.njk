@@ -1,0 +1,41 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/">PhysioCareWeb</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            {% if user %}
+                <ul class="navbar-nav me-auto">
+                    {% if user.role === 'admin' or user.role === 'physio' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/patients">Pacientes</a>
+                        </li>
+                        {% if user.role === 'admin' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="/physios">Fisioterapeutas</a>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/records">Expedientes</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/records">Mis Expedientes</a>
+                        </li>
+                    {% endif %}
+                </ul>
+
+                <div class="nav-item">
+                    <a class="nav-link text-light" href="/logout">Cerrar sesión</a>
+                </div>
+            {% else %}
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">Iniciar sesión</a>
+                    </li>
+                </ul>
+            {% endif %}
+        </div>
+    </div>
+</nav> 

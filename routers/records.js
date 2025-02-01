@@ -1,108 +1,122 @@
-const express = require("express");
-const Record = require("../models/record");
-const { authenticateToken, authenticatePatient } = require("../auth/auth");
+const express = require('express');
 const router = express.Router();
+const Record = require('../models/record');
+const Patient = require('../models/patient');
+const Physio = require('../models/physio');
+const { isAuthenticated, isPhysio } = require('../middlewares/auth');
 
-router.get('/', authenticateToken(['admin', 'physio']), async (req, res) => {
+
+router.get('/', isAuthenticated, async (req, res) => {
     try {
-        const records = await Record.find()
-            .populate('patient')
-            .populate('appointments.physio');
-        if (records.length === 0) {
-            return res.status(404).json({ error: 'No se encontraron expedientes médicos' });
+        let records;
+        if (req.session.user.role === 'patient') {
+            
+            records = await Record.find({ patient: req.session.user.id }).populate('patient');
+        } else {
+            
+            records = await Record.find().populate('patient');
         }
-        res.status(200).json({ result: records });
+        res.render('records_list.njk', { records });
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.render('error.njk', { error: 'Error al obtener los expedientes' });
     }
 });
 
-router.get('/find', authenticateToken(['admin', 'physio']), async (req, res) => {
+
+router.get('/new', isPhysio, async (req, res) => {
+    try {
+        const patients = await Patient.find();
+        res.render('record_add.njk', { patients });
+    } catch (error) {
+        res.render('error.njk', { error: 'Error al cargar el formulario' });
+    }
+});
+
+
+router.post('/', isPhysio, async (req, res) => {
+    try {
+        const record = new Record(req.body);
+        await record.save();
+        res.redirect('/records');
+    } catch (error) {
+        const patients = await Patient.find();
+        res.render('record_add.njk', {
+            error: 'Error al crear el expediente',
+            patients,
+            record: req.body
+        });
+    }
+});
+
+
+router.get('/find', isAuthenticated, async (req, res) => {
     try {
         const { surname } = req.query;
-
-        if (!surname) {
-            return res.status(400).json({
-                error: 'Es necesario proporcionar un apellido para la búsqueda'
-            });
-        }
-
-        const records = await Record.find()
-            .populate({
-                path: 'patient',
-                match: { surname: { $regex: new RegExp(surname, 'i') } },
-                select: 'name surname birthDate address insuranceNumber'
-            })
-            .populate('appointments.physio');
-
-        const filteredRecords = records.filter(record => record.patient !== null);
-
-        if (filteredRecords.length === 0) {
-            return res.status(404).json({
-                error: 'No se encontraron expedientes para el apellido proporcionado'
-            });
-        }
-
-        return res.status(200).json({ result: filteredRecords });
-    } catch (error) {
-        console.error('Error al buscar expedientes:', error);
-        return res.status(500).json({ error: 'Error interno del servidor' });
-    }
-});
-
-router.get('/:id', 
-    authenticateToken(['admin', 'physio', 'patient']),
-    authenticatePatient,
-    async (req, res) => {
-        try {
-            const record = await Record.findById(req.params.id)
-                .populate('patient')
-                .populate('appointments.physio');
-            if (!record) {
-                return res.status(404).json({ error: 'Expediente no encontrado' });
+        let records = [];
+        if (surname) {
+            if (req.session.user.role === 'patient') {
+                
+                records = await Record.find({
+                    patient: req.session.user.id
+                }).populate('patient');
+            } else {
+                
+                const patients = await Patient.find({ 
+                    surname: { $regex: surname, $options: 'i' } 
+                });
+                records = await Record.find({
+                    patient: { $in: patients.map(p => p._id) }
+                }).populate('patient');
             }
-            res.status(200).json({ result: record });
-        } catch (error) {
-            res.status(500).json({ error: 'Error interno del servidor' });
         }
-    }
-);
-
-router.post('/', authenticateToken(['admin', 'physio']), async (req, res) => {
-    try {
-        const newRecord = new Record(req.body);
-        const saveRecord = await newRecord.save();
-        res.status(201).json({ result: saveRecord });
+        res.render('record_search.njk', { records, searchTerm: surname });
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.render('error.njk', { error: 'Error al buscar expedientes' });
     }
 });
 
-router.post('/:id/appointments', authenticateToken(['admin', 'physio']), async (req, res) => {
+
+router.get('/:id/appointments/new', async (req, res) => {
+    try {
+        const record = await Record.findById(req.params.id).populate('patient');
+        const physios = await Physio.find();
+        if (!record) {
+            return res.render('error.njk', { error: 'Expediente no encontrado' });
+        }
+        res.render('record_add_appointment.njk', { record, physios });
+    } catch (error) {
+        res.render('error.njk', { error: 'Error al cargar el formulario' });
+    }
+});
+
+
+router.post('/:id/appointments', isPhysio, async (req, res) => {
     try {
         const record = await Record.findById(req.params.id);
         if (!record) {
-            return res.status(404).json({ error: 'Expediente no encontrado' });
+            return res.render('error.njk', { error: 'Expediente no encontrado' });
         }
         record.appointments.push(req.body);
-
-        const updateRecord = await record.save();
-        res.status(201).json({ result: updateRecord });
+        await record.save();
+        res.redirect(`/records/${record._id}`);
     } catch (error) {
-        res.status(500).json({ error: 'Error interno del servidor' });
+        const physios = await Physio.find();
+        res.render('record_add_appointment.njk', {
+            error: 'Error al añadir la cita',
+            record: await Record.findById(req.params.id).populate('patient'),
+            physios,
+            appointment: req.body
+        });
     }
 });
 
-router.delete('/:id', authenticateToken(['admin', 'physio']), async (req, res) => {
+
+router.delete('/:id', isPhysio, async (req, res) => {
     try {
-        const deleteRecord = await Record.findByIdAndDelete(req.params.id);
-        if (!deleteRecord) {
-            return res.status(404).json({ error: 'Expediente no existe' });
-        }
-        res.status(200).json({ result: deleteRecord });
+        await Record.findByIdAndDelete(req.params.id);
+        res.redirect('/records');
     } catch (error) {
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.render('error.njk', { error: 'Error al eliminar el expediente' });
     }
 });
 

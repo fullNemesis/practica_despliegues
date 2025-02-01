@@ -1,41 +1,43 @@
-const mongoose = require("mongoose");
-let ConsultaSchema= new mongoose.Schema({
-    date:{
+const mongoose = require('mongoose');
+
+const appointmentSchema = new mongoose.Schema({
+    date: {
         type: Date,
-        required: true
+        required: [true, 'La fecha de la cita es obligatoria']
     },
-    physio:{
+    physio: {
         type: mongoose.Schema.Types.ObjectId,
-        ref:'physios',
-        required: true,
+        ref: 'Physio',
+        required: [true, 'El fisioterapeuta es obligatorio']
     },
-    diagnosis:{
+    diagnosis: {
         type: String,
-        required: true,
-        minlength:10,
-        maxlength: 500
+        required: [true, 'El diagnóstico es obligatorio']
     },
-    treatment:{
+    treatment: {
         type: String,
-        required: true,
-    },
-    observations:{
-        type: String,
-        maxlength: 500
+        required: [true, 'El tratamiento es obligatorio']
     }
-});
-let recordsSchema = new mongoose.Schema({
-    patient:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref:'Patients',
-        required: true,
-    },
-    medicalRecord:{
-        type: String,
-        maxlength: 1000
-    },
-    appointments: [ConsultaSchema]
+}, {
+    timestamps: true
 });
 
-let record = mongoose.model('Records', recordsSchema);
-module.exports = record;
+const recordSchema = new mongoose.Schema({
+    patient: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Patient',
+        required: [true, 'El paciente es obligatorio']
+    },
+    diagnosis: {
+        type: String,
+        required: [true, 'El diagnóstico inicial es obligatorio']
+    },
+    observations: {
+        type: String
+    },
+    appointments: [appointmentSchema]
+}, {
+    timestamps: true
+});
+
+module.exports = mongoose.model('Record', recordSchema);

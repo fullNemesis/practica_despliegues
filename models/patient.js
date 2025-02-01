@@ -1,34 +1,61 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-let pacienteSchema = new mongoose.Schema({
-    name:{
+const patientSchema = new mongoose.Schema({
+    name: {
         type: String,
-        required: true,
-        minlength: 2,
-        maxlength: 50
+        required: [true, 'El nombre es obligatorio'],
+        trim: true
     },
-    surname:{
+    surname: {
         type: String,
-        required: true,
-        minlength: 2,
-        maxlength: 50
+        required: [true, 'Los apellidos son obligatorios'],
+        trim: true
     },
-    birthDate:{
+    dni: {
+        type: String,
+        required: [true, 'El DNI es obligatorio'],
+        unique: [true, 'Este DNI ya está registrado'],
+        match: [/^[0-9]{8}[A-Z]$/, 'El formato del DNI no es válido']
+    },
+    birthDate: {
         type: Date,
-        required: true
+        required: [true, 'La fecha de nacimiento es obligatoria']
     },
-    address:{
+    phone: {
         type: String,
-        maxlength: 100
+        required: [true, 'El teléfono es obligatorio'],
+        match: [/^[0-9]{9}$/, 'El formato del teléfono no es válido']
     },
-    insuranceNumber:{
+    email: {
         type: String,
-        required: true,
-        match: /^[a-zA-Z0-9]{9}$/,
-        unique: true
-
+        required: [true, 'El email es obligatorio'],
+        unique: [true, 'Este email ya está registrado'],
+        match: [/.+\@.+\..+/, 'El formato del email no es válido']
+    },
+    address: {
+        type: String,
+        required: [true, 'La dirección es obligatoria']
+    },
+    image: {
+        type: String,
+        required: false
+    },
+    username: {
+        type: String,
+        required: [true, 'El nombre de usuario es obligatorio'],
+        unique: [true, 'Este nombre de usuario ya está en uso']
+    },
+    password: {
+        type: String,
+        required: [true, 'La contraseña es obligatoria']
+    },
+    role: {
+        type: String,
+        enum: ['patient'],
+        default: 'patient'
     }
+}, {
+    timestamps: true
 });
 
-let patient = mongoose.model('Patients', pacienteSchema);
-module.exports = patient;
+module.exports = mongoose.model('Patient', patientSchema);

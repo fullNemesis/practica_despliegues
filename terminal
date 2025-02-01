@@ -1,0 +1,5 @@
+mkdir PhysioCareWeb
+cd PhysioCareWeb
+npm init -y
+mkdir public views public/images public/css 
+npm install express mongoose nunjucks bootstrap dotenv 

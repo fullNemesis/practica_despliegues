@@ -1,0 +1,32 @@
+{% extends "base.njk" %}
+
+{% block content %}
+<h2>Listado de Pacientes</h2>
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Apellidos</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for patient in patients %}
+            <tr>
+                <td>{{ patient.name }}</td>
+                <td>{{ patient.surname }}</td>
+                <td>
+                    <a href="/patients/{{ patient._id }}" class="btn btn-info btn-sm">Ver detalles</a>
+                    <a href="/patients/{{ patient._id }}/edit" class="btn btn-warning btn-sm">Editar</a>
+                    <a href="/patients/{{ patient._id }}/record/new" class="btn btn-success btn-sm">Crear expediente</a>
+                    <form action="/patients/{{ patient._id }}?_method=DELETE" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Está seguro?')">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %} 

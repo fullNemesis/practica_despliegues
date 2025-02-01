@@ -1,0 +1,48 @@
+{% extends "base.njk" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>Búsqueda de Expedientes Médicos</h2>
+    </div>
+    <div class="card-body">
+        <form action="/records/find" method="GET" class="mb-4">
+            <div class="input-group">
+                <input type="text" class="form-control" name="surname" placeholder="Buscar por apellido del paciente..." value="{{ searchTerm }}">
+                <button class="btn btn-primary" type="submit">Buscar</button>
+            </div>
+        </form>
+
+        {% if records and records.length > 0 %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Paciente</th>
+                        <th>Fecha de Creación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in records %}
+                    <tr>
+                        <td>{{ record.patient.name }} {{ record.patient.surname }}</td>
+                        <td>{{ record.createdAt | date }}</td>
+                        <td>
+                            <a href="/records/{{ record._id }}" class="btn btn-info btn-sm">Ver detalles</a>
+                            <a href="/records/{{ record._id }}/appointment/new" class="btn btn-success btn-sm">Añadir cita</a>
+                            <button class="btn btn-danger btn-sm">Eliminar</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% elif searchTerm %}
+        <div class="alert alert-info">
+            No se encontraron expedientes para pacientes con el apellido "{{ searchTerm }}"
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

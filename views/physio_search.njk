@@ -1,0 +1,49 @@
+{% extends "base.njk" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>Búsqueda de Fisioterapeutas</h2>
+    </div>
+    <div class="card-body">
+        <form action="/physios/find" method="GET" class="mb-4">
+            <div class="input-group">
+                <input type="text" class="form-control" name="specialty" placeholder="Buscar por especialidad..." value="{{ searchTerm }}">
+                <button class="btn btn-primary" type="submit">Buscar</button>
+            </div>
+        </form>
+
+        {% if physios and physios.length > 0 %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Apellidos</th>
+                        <th>Especialidad</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for physio in physios %}
+                    <tr>
+                        <td>{{ physio.name }}</td>
+                        <td>{{ physio.surname }}</td>
+                        <td>{{ physio.specialty }}</td>
+                        <td>
+                            <a href="/physios/{{ physio._id }}" class="btn btn-info btn-sm">Ver detalles</a>
+                            <a href="/physios/{{ physio._id }}/edit" class="btn btn-warning btn-sm">Editar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% elif searchTerm %}
+        <div class="alert alert-info">
+            No se encontraron fisioterapeutas con la especialidad "{{ searchTerm }}"
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

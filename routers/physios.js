@@ -2,81 +2,127 @@
 const express = require('express');
 const router = express.Router();
 const Physio = require('../models/physio');
-const { authenticateToken } = require('../auth/auth');
+const multer = require('multer');
+const upload = multer({ dest: 'public/uploads/' });
+const { isAuthenticated, isAdmin } = require('../middlewares/auth');
 
-router.get('/', authenticateToken(['admin', 'physio', 'patient']), async (req, res) => {
+// GET /physios - Listar todos los fisioterapeutas
+router.get('/', async (req, res) => {
     try {
         const physios = await Physio.find();
-        if (physios.length === 0) {
-            return res.status(404).json({ error: 'No hay fisios en el sistema' });
-        }
-        res.status(200).json({ result: physios });
+        res.render('physios_list.njk', { physios });
     } catch (error) {
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.render('error.njk', { 
+            error: 'Error al obtener los fisioterapeutas' 
+        });
     }
 });
 
-router.get('/find', authenticateToken(['admin', 'physio', 'patient']), async (req, res) => {
+
+router.get('/new', (req, res) => {
+    res.render('physio_add.njk');
+});
+
+
+router.post('/', isAdmin, upload.single('image'), async (req, res) => {
+    try {
+        const physioData = req.body;
+        if (req.file) {
+            physioData.image = req.file.filename;
+        }
+        const physio = new Physio(physioData);
+        await physio.save();
+        res.redirect('/physios');
+    } catch (error) {
+        res.render('physio_add.njk', {
+            error: 'Error al crear el fisioterapeuta',
+            physio: req.body
+        });
+    }
+});
+
+router.get('/find', isAdmin, async (req, res) => {
     try {
         const { specialty } = req.query;
-        const physios = await Physio.find({ specialty });
-        
-        if (physios.length === 0) {
-            return res.status(404).json({ error: 'No se encontraron fisios con esos criterios' });
+        let physios = [];
+        if (specialty) {
+            physios = await Physio.find({ 
+                specialty: { $regex: specialty, $options: 'i' } 
+            });
         }
-        res.status(200).json({ result: physios });
+        res.render('physio_search.njk', { 
+            physios,
+            searchTerm: specialty 
+        });
     } catch (error) {
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.render('error.njk', { 
+            error: 'Error al buscar fisioterapeutas' 
+        });
     }
 });
 
-router.get('/:id', authenticateToken(['admin', 'physio', 'patient']), async (req, res) => {
+
+router.get('/:id', async (req, res) => {
     try {
         const physio = await Physio.findById(req.params.id);
         if (!physio) {
-            return res.status(404).json({ error: 'El fisio no se ha encontrado' });
+            return res.render('error.njk', { 
+                error: 'Fisioterapeuta no encontrado' 
+            });
         }
-        res.status(200).json({ result: physio });
+        res.render('physio_detail.njk', { physio });
     } catch (error) {
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.render('error.njk', { 
+            error: 'Error al obtener el fisioterapeuta' 
+        });
     }
 });
 
-router.post('/', authenticateToken(['admin']), async (req, res) => {
+
+router.get('/:id/edit', async (req, res) => {
     try {
-        const physio = new Physio(req.body);
-        const savedPhysio = await physio.save();
-        res.status(201).json({ result: savedPhysio });
+        const physio = await Physio.findById(req.params.id);
+        if (!physio) {
+            return res.render('error.njk', { 
+                error: 'Fisioterapeuta no encontrado' 
+            });
+        }
+        res.render('physio_edit.njk', { physio });
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.render('error.njk', { 
+            error: 'Error al obtener el fisioterapeuta' 
+        });
     }
 });
 
-router.put('/:id', authenticateToken(['admin']), async (req, res) => {
+
+router.put('/:id', isAdmin, upload.single('image'), async (req, res) => {
     try {
-        const updatedPhysio = await Physio.findByIdAndUpdate(
+        const physioData = req.body;
+        if (req.file) {
+            physioData.image = req.file.filename;
+        }
+        const physio = await Physio.findByIdAndUpdate(
             req.params.id,
-            req.body,
+            physioData,
             { new: true }
         );
-        if (!updatedPhysio) {
-            return res.status(400).json({ error: 'Error actualizando los datos del fisio' });
-        }
-        res.status(200).json({ result: updatedPhysio });
+        res.redirect(`/physios/${physio._id}`);
     } catch (error) {
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.render('physio_edit.njk', {
+            error: 'Error al actualizar el fisioterapeuta',
+            physio: req.body
+        });
     }
 });
 
-router.delete('/:id', authenticateToken(['admin']), async (req, res) => {
+
+router.delete('/:id', isAdmin, async (req, res) => {
     try {
-        const deletedPhysio = await Physio.findByIdAndDelete(req.params.id);
-        if (!deletedPhysio) {
-            return res.status(404).json({ error: 'El fisioterapeuta a eliminar no existe' });
-        }
-        res.status(200).json({ result: deletedPhysio });
+        await Physio.findByIdAndDelete(req.params.id);
+        res.redirect('/physios');
     } catch (error) {
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.render('error.njk', { error: 'Error al eliminar el fisioterapeuta' });
     }
 });
 

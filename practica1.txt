@@ -1,0 +1,67 @@
+Despliegue de Aplicaciones Web Curso 24-25
+1
+Práctica 2
+Desarrollo de una aplicación completa para la para la gestión de una clínica de fisioterapia con Express, Mongoose y un motor de plantillas.
+Parte 1. Integración de vistas dinámicas con Nunjucks
+Vamos a adaptar la práctica anterior para dotarla de vistas HTML dinámicas utilizando el motor de plantillas Nunjucks, y sustituiremos la autenticación basada en tokens por un sistema de sesiones con roles.
+1.1 Pasos previos
+Crea una copia del proyecto anterior, nómbralo PhysioCareWeb y aplica estos cambios iniciales:
+•
+Desinstala/Elimina la librería jsonwebtoken, así como la carpeta auth, el enrutador routes/auth y cualquier referencia a la autenticación por tokens en el proyecto (incluyendo el uso del middleware correspondiente en los servicios REST)
+•
+Instala, carga y configura Nunjucks como se ha explicado en los apuntes, y prepáralo para localizar las vistas en la subcarpeta views, que deberás crear en el directorio raíz del proyecto.
+•
+Instala Bootstrap y configúralo para que los estilos se sirvan desde su carpeta /dist.
+•
+Configura un middleware para servir archivos estáticos desde una carpeta /public. Este directorio debe incluir:
+o
+Un archivo llamado index.html, que será la página de bienvenida inicial de la aplicación.
+o
+Una subcarpeta /images para almacenar las imágenes del proyecto.
+o
+Si es necesario, una subcarpeta /css para tus propios archivos CSS.
+•
+Finalmente, añade un servicio en la ruta raíz (/) para que redirija a la página inicial (index.html), ubicada en la carpeta /public.
+•
+El fichero package.json debe quedarte con las siguientes dependencias (no importa en qué orden): bootstrap, dotenv, express, mongoose y nunjucks.
+Jerarquía de vistas
+•
+Crea una plantilla base, base.njk, que incluya:
+o
+Un título dinámico, enlace a los estilos de Bootstrap y un bloque para el contenido principal de cada página.
+•
+Crea una plantilla para el menú de navegación, menu.njk, que incluya inicialmente un enlace al servicio de login.
+Despliegue de Aplicaciones Web Curso 24-25
+2
+o
+Incluye menu.njk dentro de base.njk para que el menú aparezca en todas las vistas.
+Vistas a definir
+En esta primera parte de la práctica se pide definir las siguientes vistas. Todas ellas heredarán de la plantilla base.njk.
+•
+Error: servirá para mostrar un mensaje de error desde cualquier punto en que se renderice, de forma similar a como se ha visto en los apuntes (error.njk)
+•
+Pacientes:
+o
+Listado de pacientes (patients_list.njk): mostrará todos los pacientes registrados con enlaces para editar, eliminar, ver detalles y crear expediente de cada uno de ellos.
+o
+Detalle de paciente (patient_detail.njk): mostrará información detallada del paciente seleccionado.
+•
+Fisioterapeutas (Physios):
+o
+Listado de fisios (physios_list.njk): mostrará todos los fisioterapeutas registrados, con enlaces para editar, eliminar y ver detalles.
+o
+Detalle de fisio (physio_detail.njk): mostrará toda la información del especialista seleccionado.
+•
+Expedientes Médicos (Records):
+o
+Listado de expedientes médicos (records_list.njk): esta vista mostrará un listado de todos los expedientes médicos registrados.
+▪
+De cada expediente se mostrará el nombre y apellidos del paciente y tres botones:
+•
+Botón View details, redirige a record_details.njk.
+•
+Botón Add appointment, redirije record_add_appointment.njk.
+•
+Botón Delete, para eliminar el expediente.
+o
+Detalle de expediente (record_detail.njk): esta vista mostrará todo el detalle de un expediente, incluyendo los datos del paciente y todas sus citas.

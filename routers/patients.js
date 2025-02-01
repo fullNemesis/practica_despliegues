@@ -1,84 +1,115 @@
 const express = require('express');
 const router = express.Router();
 const Patient = require('../models/patient');
-const { authenticateToken, authenticatePatient } = require('../auth/auth');
+const multer = require('multer');
+const upload = multer({ dest: 'public/uploads/' });
+const { isAuthenticated, isPhysio } = require('../middlewares/auth');
 
-router.get('/', authenticateToken(['admin', 'physio']), async (req, res) => {
+
+router.get('/', async (req, res) => {
     try {
         const patients = await Patient.find();
-        if (patients.length === 0) {
-            return res.status(404).json({ error: 'No hay pacientes en el sistema' });
-        }
-        res.status(200).json({ result: patients });
+        res.render('patients_list.njk', { patients });
     } catch (error) {
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.render('error.njk', { error: 'Error al obtener los pacientes' });
     }
 });
 
-router.get('/find', authenticateToken(['admin', 'physio']), async (req, res) => {
+router.get('/new', (req, res) => {
+    res.render('patient_add.njk');
+});
+
+router.post('/', isPhysio, upload.single('image'), async (req, res) => {
+    try {
+        const patientData = req.body;
+        if (req.file) {
+            patientData.image = req.file.filename;
+        }
+        const patient = new Patient(patientData);
+        await patient.save();
+        res.redirect('/patients');
+    } catch (error) {
+        res.render('patient_add.njk', { 
+            error: 'Error al crear el paciente',
+            patient: req.body 
+        });
+    }
+});
+
+router.get('/find', isPhysio, async (req, res) => {
     try {
         const { surname } = req.query;
-        const patients = await Patient.find({
-            surname: { $regex: surname, $options: 'i' }
-        });
-        
-        if (patients.length === 0) {
-            return res.status(404).json({ error: 'No se encontraron pacientes con esos criterios' });
+        let patients = [];
+        if (surname) {
+            patients = await Patient.find({ 
+                surname: { $regex: surname, $options: 'i' } 
+            });
         }
-        res.status(200).json({ result: patients });
+        res.render('patient_search.njk', { patients, searchTerm: surname });
     } catch (error) {
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.render('error.njk', { error: 'Error al buscar pacientes' });
     }
 });
 
-router.get('/:id', authenticateToken(['admin', 'physio', 'patient']), 
-    authenticatePatient, async (req, res) => {
+
+router.get('/:id', async (req, res) => {
     try {
         const patient = await Patient.findById(req.params.id);
         if (!patient) {
-            return res.status(404).json({ error: 'El paciente no se ha encontrado' });
+            return res.render('error.njk', { 
+                error: 'Paciente no encontrado' 
+            });
         }
-        res.status(200).json({ result: patient });
+        res.render('patient_detail.njk', { patient });
     } catch (error) {
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.render('error.njk', { 
+            error: 'Error al obtener el paciente' 
+        });
     }
 });
 
-router.post('/', authenticateToken(['admin', 'physio']), async (req, res) => {
+router.get('/:id/edit', async (req, res) => {
     try {
-        const patient = new Patient(req.body);
-        const savedPatient = await patient.save();
-        res.status(201).json({ result: savedPatient });
+        const patient = await Patient.findById(req.params.id);
+        if (!patient) {
+            return res.render('error.njk', { 
+                error: 'Paciente no encontrado' 
+            });
+        }
+        res.render('patient_edit.njk', { patient });
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.render('error.njk', { 
+            error: 'Error al obtener el paciente' 
+        });
     }
 });
 
-router.put('/:id', authenticateToken(['admin', 'physio']), async (req, res) => {
+router.put('/:id', isPhysio, upload.single('image'), async (req, res) => {
     try {
-        const updatedPatient = await Patient.findByIdAndUpdate(
+        const patientData = req.body;
+        if (req.file) {
+            patientData.image = req.file.filename;
+        }
+        const patient = await Patient.findByIdAndUpdate(
             req.params.id,
-            req.body,
+            patientData,
             { new: true }
         );
-        if (!updatedPatient) {
-            return res.status(400).json({ error: 'Error actualizando los datos del paciente' });
-        }
-        res.status(200).json({ result: updatedPatient });
+        res.redirect(`/patients/${patient._id}`);
     } catch (error) {
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.render('patient_edit.njk', {
+            error: 'Error al actualizar el paciente',
+            patient: req.body
+        });
     }
 });
 
-router.delete('/:id', authenticateToken(['admin', 'physio']), async (req, res) => {
+router.delete('/:id', isPhysio, async (req, res) => {
     try {
-        const deletedPatient = await Patient.findByIdAndDelete(req.params.id);
-        if (!deletedPatient) {
-            return res.status(404).json({ error: 'El paciente a eliminar no existe' });
-        }
-        res.status(200).json({ result: deletedPatient });
+        await Patient.findByIdAndDelete(req.params.id);
+        res.redirect('/patients');
     } catch (error) {
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.render('error.njk', { error: 'Error al eliminar el paciente' });
     }
 });
 
