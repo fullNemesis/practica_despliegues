@@ -9,7 +9,6 @@ exports.login = async (req, res) => {
     try {
         const { username, password } = req.body;
 
-        // Buscar usuario
         const user = await User.findOne({ login: username });
         if (!user) {
             return res.render('login.njk', {
@@ -18,7 +17,6 @@ exports.login = async (req, res) => {
             });
         }
 
-        // Verificar contraseña
         const isValid = await user.comparePassword(password);
         if (!isValid) {
             return res.render('login.njk', {
@@ -27,7 +25,6 @@ exports.login = async (req, res) => {
             });
         }
 
-        // Crear sesión
         req.session.user = {
             id: user._id,
             username: user.login,
@@ -36,7 +33,6 @@ exports.login = async (req, res) => {
             patientId: user.patientId
         };
 
-        // Redirigir según rol
         if (user.rol === 'admin') {
             res.redirect('/physios');
         } else if (user.rol === 'physio') {

@@ -13,13 +13,11 @@ const User = require('./models/user');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Configuración de Nunjucks
 const env = nunjucks.configure('views', {
     autoescape: true,
     express: app
 });
 
-// Agregar filtro de fecha
 env.addFilter('date', function(date) {
     if (!date) return '';
     const d = new Date(date);
@@ -31,25 +29,22 @@ env.addFilter('date', function(date) {
     });
 });
 
-// Middlewares básicos
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(methodOverride('_method')); // Para PUT y DELETE en formularios
+app.use(methodOverride('_method')); 
 app.use(session);
 
-// Middleware para hacer el usuario disponible en todas las vistas
 app.use((req, res, next) => {
     res.locals.user = req.session.user;
     next();
 });
 
-// Middleware para archivos estáticos específicos
 app.use('/uploads', express.static('public/uploads'));
 app.use('/images', express.static('public/images'));
 app.use('/css', express.static('public/css'));
 app.use('/bootstrap', express.static('node_modules/bootstrap/dist'));
 
-// Rutas de autenticación
+
 app.get('/login', (req, res) => {
     if (req.session.user) {
         return res.redirect('/');
@@ -135,8 +130,8 @@ app.get('/logout', (req, res) => {
     });
 });
 
-// Ruta de prueba para crear un admin (ELIMINAR EN PRODUCCIÓN)
-app.get('/setup', async (req, res) => {
+// Ruta de configuración para crear admin (ELIMINAR EN PRODUCCIÓN)
+/* app.get('/setup', async (req, res) => {
     try {
         const adminExists = await Physio.findOne({ username: 'admin' });
         if (adminExists) {
@@ -163,10 +158,10 @@ app.get('/setup', async (req, res) => {
     } catch (error) {
         res.status(500).send('Error creando admin');
     }
-});
+}); */
 
 // Ruta de prueba para verificar admin (ELIMINAR EN PRODUCCIÓN)
-app.get('/test-admin', async (req, res) => {
+/* app.get('/test-admin', async (req, res) => {
     try {
         const admin = await Physio.findOne({ username: 'admin' });
         if (!admin) {
@@ -189,25 +184,24 @@ app.get('/test-admin', async (req, res) => {
         res.status(500).send('Error al verificar admin');
     }
 });
+ */
 
-// Importar rutas
 const patientsRouter = require('./routers/patients');
 const physiosRouter = require('./routers/physios');
 const recordsRouter = require('./routers/records');
 
-// Rutas protegidas con middleware de autenticación y roles
 const { isAuthenticated, isAdmin, isPhysio } = require('./middlewares/auth');
 
-// Rutas de pacientes - acceso para physios y admin
+
 app.use('/patients', isAuthenticated, patientsRouter);
 
-// Rutas de fisios - solo acceso admin
+
 app.use('/physios', isAuthenticated, isAdmin, physiosRouter);
 
-// Rutas de expedientes - acceso según rol
+
 app.use('/records', isAuthenticated, recordsRouter);
 
-// Ruta raíz - debe ir antes de express.static
+
 app.get('/', (req, res) => {
     if (!req.session.user) {
         return res.redirect('/login');
@@ -218,10 +212,9 @@ app.get('/', (req, res) => {
     });
 });
 
-// Servir archivos estáticos generales después de las rutas dinámicas
 app.use(express.static('public'));
 
-// Conexión a MongoDB
+
 mongoose.connect(process.env.MONGODB_URI)
     .then(() => {
         app.listen(PORT, () => {

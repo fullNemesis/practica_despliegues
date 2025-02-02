@@ -7,18 +7,15 @@ async function createAdmin() {
     try {
         await mongoose.connect(process.env.MONGODB_URI);
         
-        // Comprobar si ya existe un admin
         const adminExists = await Physio.findOne({ role: 'admin' });
         if (adminExists) {
             console.log('Ya existe un usuario administrador');
             return;
         }
 
-        // Crear contraseña hasheada
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash('admin123', salt);
 
-        // Crear admin
         const admin = new Physio({
             name: 'Admin',
             surname: 'System',

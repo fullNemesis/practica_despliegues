@@ -66,7 +66,6 @@ const physioSchema = new mongoose.Schema({
     strict: true
 });
 
-// Eliminar índices antiguos al iniciar
 physioSchema.pre('save', async function(next) {
     try {
         const collection = this.collection;
