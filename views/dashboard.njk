@@ -1,0 +1,34 @@
+{% extends "base.njk" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Bienvenido, {{ user.username }}</h2>
+                </div>
+                <div class="card-body">
+                    <p>Has iniciado sesión como: <strong>{{ user.role }}</strong></p>
+                    
+                    <div class="mt-4">
+                        <h3>Acciones disponibles:</h3>
+                        <div class="list-group">
+                            {% if user.role == 'admin' %}
+                                <a href="/patients" class="list-group-item list-group-item-action">Gestionar Pacientes</a>
+                                <a href="/physios" class="list-group-item list-group-item-action">Gestionar Fisioterapeutas</a>
+                                <a href="/records" class="list-group-item list-group-item-action">Gestionar Expedientes</a>
+                            {% elif user.role == 'physio' %}
+                                <a href="/patients" class="list-group-item list-group-item-action">Ver Pacientes</a>
+                                <a href="/records" class="list-group-item list-group-item-action">Gestionar Expedientes</a>
+                            {% else %}
+                                <a href="/records" class="list-group-item list-group-item-action">Ver mis Expedientes</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

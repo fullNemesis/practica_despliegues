@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const Patient = require('../models/patient');
+const User = require('../models/user');
 const multer = require('multer');
 const upload = multer({ dest: 'public/uploads/' });
 const { isAuthenticated, isPhysio } = require('../middlewares/auth');
 
-
-router.get('/', async (req, res) => {
+router.get('/', isAuthenticated, async (req, res) => {
     try {
         const patients = await Patient.find();
         res.render('patients_list.njk', { patients });
@@ -15,22 +15,34 @@ router.get('/', async (req, res) => {
     }
 });
 
-router.get('/new', (req, res) => {
+router.get('/new', isPhysio, (req, res) => {
     res.render('patient_add.njk');
 });
 
 router.post('/', isPhysio, upload.single('image'), async (req, res) => {
     try {
-        const patientData = req.body;
+        const patientData = {
+            name: req.body.name,
+            surname: req.body.surname,
+            dni: req.body.dni,
+            birthDate: req.body.birthDate,
+            phone: req.body.phone,
+            email: req.body.email,
+            address: req.body.address,
+            username: req.body.username,
+            password: req.body.password
+        };
+
         if (req.file) {
             patientData.image = req.file.filename;
         }
+
         const patient = new Patient(patientData);
         await patient.save();
         res.redirect('/patients');
     } catch (error) {
         res.render('patient_add.njk', { 
-            error: 'Error al crear el paciente',
+            error: error.message || 'Error al crear el paciente',
             patient: req.body 
         });
     }
@@ -51,8 +63,7 @@ router.get('/find', isPhysio, async (req, res) => {
     }
 });
 
-
-router.get('/:id', async (req, res) => {
+router.get('/:id', isAuthenticated, async (req, res) => {
     try {
         const patient = await Patient.findById(req.params.id);
         if (!patient) {
@@ -68,7 +79,7 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-router.get('/:id/edit', async (req, res) => {
+router.get('/:id/edit', isPhysio, async (req, res) => {
     try {
         const patient = await Patient.findById(req.params.id);
         if (!patient) {
@@ -110,6 +121,21 @@ router.delete('/:id', isPhysio, async (req, res) => {
         res.redirect('/patients');
     } catch (error) {
         res.render('error.njk', { error: 'Error al eliminar el paciente' });
+    }
+});
+
+router.get('/:id/record/new', isPhysio, async (req, res) => {
+    try {
+        const patient = await Patient.findById(req.params.id);
+        if (!patient) {
+            return res.render('error.njk', { error: 'Paciente no encontrado' });
+        }
+        res.render('record_add.njk', { 
+            patient,
+            patients: [patient]
+        });
+    } catch (error) {
+        res.render('error.njk', { error: 'Error al cargar el formulario' });
     }
 });
 

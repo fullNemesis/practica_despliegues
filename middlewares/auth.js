@@ -1,12 +1,22 @@
 exports.isAuthenticated = (req, res, next) => {
+    console.log('Verificando autenticación:', {
+        sessionExists: !!req.session,
+        userExists: !!req.session?.user,
+        user: req.session?.user
+    });
+
     if (req.session.user) {
         next();
     } else {
-        res.redirect('/auth/login');
+        res.redirect('/login');
     }
 };
 
 exports.isAdmin = (req, res, next) => {
+    console.log('Verificando rol admin:', {
+        role: req.session?.user?.role
+    });
+
     if (req.session.user && req.session.user.role === 'admin') {
         next();
     } else {
@@ -18,6 +28,10 @@ exports.isAdmin = (req, res, next) => {
 };
 
 exports.isPhysio = (req, res, next) => {
+    console.log('Verificando rol physio:', {
+        role: req.session?.user?.role
+    });
+
     if (req.session.user && (req.session.user.role === 'physio' || req.session.user.role === 'admin')) {
         next();
     } else {
@@ -29,8 +43,14 @@ exports.isPhysio = (req, res, next) => {
 };
 
 exports.isPatientOwner = (req, res, next) => {
+    console.log('Verificando propiedad de paciente:', {
+        userRole: req.session?.user?.role,
+        patientId: req.session?.user?.patientId,
+        requestedId: req.params.id
+    });
+
     if (!req.session.user) {
-        return res.redirect('/auth/login');
+        return res.redirect('/login');
     }
 
     if (req.session.user.role === 'admin' || req.session.user.role === 'physio') {

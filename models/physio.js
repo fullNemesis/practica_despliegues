@@ -62,7 +62,22 @@ const physioSchema = new mongoose.Schema({
         required: true
     }
 }, {
-    timestamps: true
+    timestamps: true,
+    strict: true
+});
+
+// Eliminar índices antiguos al iniciar
+physioSchema.pre('save', async function(next) {
+    try {
+        const collection = this.collection;
+        const indexes = await collection.getIndexes();
+        if (indexes.licenseNumber_1) {
+            await collection.dropIndex('licenseNumber_1');
+        }
+        next();
+    } catch (error) {
+        next();
+    }
 });
 
 module.exports = mongoose.model('Physio', physioSchema);

@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const mongoose = require('mongoose');
+const User = require('../models/user');
 
 exports.showLogin = (req, res) => {
     res.render('login.njk', { title: 'Iniciar Sesión' });
@@ -9,9 +9,8 @@ exports.login = async (req, res) => {
     try {
         const { username, password } = req.body;
 
-        // Buscar en la colección users
-        const user = await mongoose.connection.collection('users').findOne({ login: username });
-
+        // Buscar usuario
+        const user = await User.findOne({ login: username });
         if (!user) {
             return res.render('login.njk', {
                 error: 'Usuario no encontrado',
@@ -19,7 +18,8 @@ exports.login = async (req, res) => {
             });
         }
 
-        const isValid = await bcrypt.compare(password, user.password);
+        // Verificar contraseña
+        const isValid = await user.comparePassword(password);
         if (!isValid) {
             return res.render('login.njk', {
                 error: 'Contraseña incorrecta',
@@ -27,13 +27,16 @@ exports.login = async (req, res) => {
             });
         }
 
+        // Crear sesión
         req.session.user = {
             id: user._id,
             username: user.login,
             role: user.rol,
-            name: user.login
+            name: user.login,
+            patientId: user.patientId
         };
 
+        // Redirigir según rol
         if (user.rol === 'admin') {
             res.redirect('/physios');
         } else if (user.rol === 'physio') {

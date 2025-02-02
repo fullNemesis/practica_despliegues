@@ -1,0 +1,41 @@
+/* Estilos generales */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+/* Estilos del navbar */
+.navbar {
+    margin-bottom: 2rem;
+}
+
+/* Estilos de las cards */
+.card {
+    margin-bottom: 1rem;
+}
+
+/* Estilos de los formularios */
+.form-label {
+    font-weight: bold;
+}
+
+.form-control {
+    margin-bottom: 0.5rem;
+}
+
+/* Estilos de los botones */
+.btn {
+    margin-right: 0.5rem;
+}
+
+/* Estilos de las tablas */
+.table {
+    margin-top: 1rem;
+}
+
+/* Estilos de los mensajes de error */
+.alert {
+    margin-bottom: 1rem;
+} 

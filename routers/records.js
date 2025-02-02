@@ -5,15 +5,12 @@ const Patient = require('../models/patient');
 const Physio = require('../models/physio');
 const { isAuthenticated, isPhysio } = require('../middlewares/auth');
 
-
 router.get('/', isAuthenticated, async (req, res) => {
     try {
         let records;
         if (req.session.user.role === 'patient') {
-            
             records = await Record.find({ patient: req.session.user.id }).populate('patient');
         } else {
-            
             records = await Record.find().populate('patient');
         }
         res.render('records_list.njk', { records });
@@ -21,7 +18,6 @@ router.get('/', isAuthenticated, async (req, res) => {
         res.render('error.njk', { error: 'Error al obtener los expedientes' });
     }
 });
-
 
 router.get('/new', isPhysio, async (req, res) => {
     try {
@@ -32,10 +28,13 @@ router.get('/new', isPhysio, async (req, res) => {
     }
 });
 
-
 router.post('/', isPhysio, async (req, res) => {
     try {
-        const record = new Record(req.body);
+        const record = new Record({
+            patient: req.body.patientId,
+            diagnosis: req.body.diagnosis,
+            observations: req.body.observations
+        });
         await record.save();
         res.redirect('/records');
     } catch (error) {
@@ -48,35 +47,24 @@ router.post('/', isPhysio, async (req, res) => {
     }
 });
 
-
-router.get('/find', isAuthenticated, async (req, res) => {
+router.get('/:id', isAuthenticated, async (req, res) => {
     try {
-        const { surname } = req.query;
-        let records = [];
-        if (surname) {
-            if (req.session.user.role === 'patient') {
-                
-                records = await Record.find({
-                    patient: req.session.user.id
-                }).populate('patient');
-            } else {
-                
-                const patients = await Patient.find({ 
-                    surname: { $regex: surname, $options: 'i' } 
-                });
-                records = await Record.find({
-                    patient: { $in: patients.map(p => p._id) }
-                }).populate('patient');
-            }
+        const record = await Record.findById(req.params.id)
+            .populate('patient')
+            .populate({
+                path: 'appointments.physio',
+                model: 'Physio'
+            });
+        if (!record) {
+            return res.render('error.njk', { error: 'Expediente no encontrado' });
         }
-        res.render('record_search.njk', { records, searchTerm: surname });
+        res.render('record_detail.njk', { record });
     } catch (error) {
-        res.render('error.njk', { error: 'Error al buscar expedientes' });
+        res.render('error.njk', { error: 'Error al cargar el expediente' });
     }
 });
 
-
-router.get('/:id/appointments/new', async (req, res) => {
+router.get('/:id/appointments/new', isAuthenticated, async (req, res) => {
     try {
         const record = await Record.findById(req.params.id).populate('patient');
         const physios = await Physio.find();
@@ -89,27 +77,31 @@ router.get('/:id/appointments/new', async (req, res) => {
     }
 });
 
-
 router.post('/:id/appointments', isPhysio, async (req, res) => {
     try {
         const record = await Record.findById(req.params.id);
         if (!record) {
             return res.render('error.njk', { error: 'Expediente no encontrado' });
         }
-        record.appointments.push(req.body);
+
+        record.appointments.push({
+            date: req.body.date,
+            physio: req.body.physioId,
+            diagnosis: req.body.diagnosis,
+            treatment: req.body.treatment
+        });
         await record.save();
         res.redirect(`/records/${record._id}`);
     } catch (error) {
         const physios = await Physio.find();
+        const record = await Record.findById(req.params.id).populate('patient');
         res.render('record_add_appointment.njk', {
             error: 'Error al añadir la cita',
-            record: await Record.findById(req.params.id).populate('patient'),
-            physios,
-            appointment: req.body
+            record,
+            physios
         });
     }
 });
-
 
 router.delete('/:id', isPhysio, async (req, res) => {
     try {

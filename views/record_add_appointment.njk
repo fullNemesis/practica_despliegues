@@ -6,7 +6,11 @@
         <h2>Nueva Cita</h2>
     </div>
     <div class="card-body">
-        <form action="/records/{{ record._id }}/appointment" method="POST">
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+        
+        <form action="/records/{{ record._id }}/appointments" method="POST">
             <div class="mb-3">
                 <label for="date" class="form-label">Fecha y Hora</label>
                 <input type="datetime-local" class="form-control" id="date" name="date" required>

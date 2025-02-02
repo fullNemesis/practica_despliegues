@@ -11,18 +11,14 @@ const storage = multer.diskStorage({
     }
 });
 
-const fileFilter = (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
-        cb(null, true);
-    } else {
-        cb(new Error('El archivo debe ser una imagen'), false);
-    }
-};
-
-module.exports = multer({ 
+const upload = multer({ 
     storage: storage,
-    fileFilter: fileFilter,
-    limits: {
-        fileSize: 5 * 1024 * 1024 
+    fileFilter: function (req, file, cb) {
+        if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+            return cb(new Error('Solo se permiten archivos de imagen!'), false);
+        }
+        cb(null, true);
     }
-}); 
+});
+
+module.exports = upload; 

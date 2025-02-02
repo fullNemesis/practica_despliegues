@@ -2,10 +2,10 @@
   "name": "physiocareweb",
   "version": "1.0.0",
   "description": "Aplicación de gestión de clínica de fisioterapia",
-  "main": "app.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js",
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "create-admin": "node scripts/createAdmin.js",
     "update-admin": "node scripts/updateAdminPassword.js"
   },

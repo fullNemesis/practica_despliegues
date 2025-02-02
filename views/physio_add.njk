@@ -6,15 +6,19 @@
         <h2>Registro de Nuevo Fisioterapeuta</h2>
     </div>
     <div class="card-body">
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+        
         <form action="/physios" method="POST" enctype="multipart/form-data">
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="name" class="form-label">Nombre</label>
-                    <input type="text" class="form-control" id="name" name="name" required>
+                    <input type="text" class="form-control" id="name" name="name" required value="{{ physio.name if physio }}">
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="surname" class="form-label">Apellidos</label>
-                    <input type="text" class="form-control" id="surname" name="surname" required>
+                    <input type="text" class="form-control" id="surname" name="surname" required value="{{ physio.surname if physio }}">
                 </div>
             </div>
 
@@ -25,33 +29,33 @@
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="dni" class="form-label">DNI</label>
-                    <input type="text" class="form-control" id="dni" name="dni" required>
+                    <label for="dni" class="form-label">DNI (formato: 12345678A)</label>
+                    <input type="text" class="form-control" id="dni" name="dni" required pattern="^[0-9]{8}[A-Z]$" value="{{ physio.dni if physio }}">
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="collegiateNumber" class="form-label">Número de Colegiado</label>
-                    <input type="text" class="form-control" id="collegiateNumber" name="collegiateNumber" required>
+                    <input type="text" class="form-control" id="collegiateNumber" name="collegiateNumber" required value="{{ physio.collegiateNumber if physio }}">
                 </div>
             </div>
 
             <div class="mb-3">
                 <label for="specialty" class="form-label">Especialidad</label>
-                <input type="text" class="form-control" id="specialty" name="specialty" required>
+                <input type="text" class="form-control" id="specialty" name="specialty" required value="{{ physio.specialty if physio }}">
             </div>
 
             <div class="mb-3">
                 <label for="yearsOfExperience" class="form-label">Años de Experiencia</label>
-                <input type="number" class="form-control" id="yearsOfExperience" name="yearsOfExperience" required>
+                <input type="number" class="form-control" id="yearsOfExperience" name="yearsOfExperience" required min="0" value="{{ physio.yearsOfExperience if physio }}">
             </div>
 
             <div class="mb-3">
                 <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" name="email" required>
+                <input type="email" class="form-control" id="email" name="email" required value="{{ physio.email if physio }}">
             </div>
 
             <div class="mb-3">
-                <label for="phone" class="form-label">Teléfono</label>
-                <input type="tel" class="form-control" id="phone" name="phone" required>
+                <label for="phone" class="form-label">Teléfono (9 dígitos)</label>
+                <input type="tel" class="form-control" id="phone" name="phone" required pattern="^[0-9]{9}$" value="{{ physio.phone if physio }}">
             </div>
 
             <hr>
@@ -59,12 +63,12 @@
             
             <div class="mb-3">
                 <label for="username" class="form-label">Nombre de Usuario</label>
-                <input type="text" class="form-control" id="username" name="username" required>
+                <input type="text" class="form-control" id="username" name="username" required value="{{ physio.username if physio }}">
             </div>
 
             <div class="mb-3">
-                <label for="password" class="form-label">Contraseña</label>
-                <input type="password" class="form-control" id="password" name="password" required>
+                <label for="password" class="form-label">Contraseña (mínimo 6 caracteres)</label>
+                <input type="password" class="form-control" id="password" name="password" required minlength="6">
             </div>
 
             <button type="submit" class="btn btn-primary">Registrar Fisioterapeuta</button>

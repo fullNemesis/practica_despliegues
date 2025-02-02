@@ -3,23 +3,22 @@
 {% block content %}
 <div class="card">
     <div class="card-header">
-        <h2>Búsqueda de Expedientes Médicos</h2>
+        <h2>Buscar Expedientes</h2>
     </div>
     <div class="card-body">
         <form action="/records/find" method="GET" class="mb-4">
             <div class="input-group">
-                <input type="text" class="form-control" name="surname" placeholder="Buscar por apellido del paciente..." value="{{ searchTerm }}">
-                <button class="btn btn-primary" type="submit">Buscar</button>
+                <input type="text" name="surname" class="form-control" placeholder="Buscar por apellido..." value="{{ searchTerm }}">
+                <button type="submit" class="btn btn-primary">Buscar</button>
             </div>
         </form>
 
-        {% if records and records.length > 0 %}
+        {% if records.length > 0 %}
         <div class="table-responsive">
             <table class="table">
                 <thead>
                     <tr>
                         <th>Paciente</th>
-                        <th>Fecha de Creación</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -27,21 +26,20 @@
                     {% for record in records %}
                     <tr>
                         <td>{{ record.patient.name }} {{ record.patient.surname }}</td>
-                        <td>{{ record.createdAt | date }}</td>
                         <td>
                             <a href="/records/{{ record._id }}" class="btn btn-info btn-sm">Ver detalles</a>
-                            <a href="/records/{{ record._id }}/appointment/new" class="btn btn-success btn-sm">Añadir cita</a>
-                            <button class="btn btn-danger btn-sm">Eliminar</button>
+                            <a href="/records/{{ record._id }}/appointments/new" class="btn btn-success btn-sm">Añadir cita</a>
+                            <form action="/records/{{ record._id }}?_method=DELETE" method="POST" style="display: inline;">
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Está seguro de que desea eliminar este expediente?')">Eliminar</button>
+                            </form>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-        {% elif searchTerm %}
-        <div class="alert alert-info">
-            No se encontraron expedientes para pacientes con el apellido "{{ searchTerm }}"
-        </div>
+        {% else %}
+        <p class="text-muted">No se encontraron expedientes.</p>
         {% endif %}
     </div>
 </div>
