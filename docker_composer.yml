@@ -3,7 +3,7 @@ services:
     container_name: appphysiocare
     build: .
     ports:
-      - "3001:3001"
+      - "3001:3000"
     restart: unless-stopped
     volumes:
       - .:/usr/src/app
@@ -18,4 +18,4 @@ services:
       - "27018:27017"
     restart: unless-stopped
     volumes:
-      - ../data_docker:/data/db 
+      - ../data_docker:/data/db

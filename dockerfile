@@ -1,23 +1,20 @@
-# Use an official Node.js runtime as a parent image
+# Usa la imagen base oficial de Node.js
 FROM node:20.17.0
 
-# Crea un directorio llamado "app" en la ruta /usr/src/ con la opción -p para asegurar que se crean todos los subdirectorios, incluso si ya existen.
-RUN mkdir-p /usr/src/app
-
-# Set the working directory
+# Establecer el directorio de trabajo
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json
+# Copia solo los archivos necesarios para instalar dependencias primero
 COPY package*.json ./
 
-# Install dependencies
+# Instala las dependencias de la aplicación
 RUN npm install
 
-# Copy the rest of the application code
+# Copia el resto del código al contenedor
 COPY . .
 
-# Expose the port the app runs on
+# Expone el puerto 3001
 EXPOSE 3001
 
-# Command to run the application
+# Comando por defecto para iniciar la aplicación
 CMD ["npm", "start"]
